@@ -16,7 +16,7 @@ import (
 // ReadInterface reads packets from the named interface
 // if asJSON is true the results will be dumped as newline separated JSON objects
 // otherwise CSV will be printed to the supplied io.Writer.
-func ReadInterface(iface string, out io.Writer, separator string, ja3s bool, asJSON bool, snaplen int, promisc bool, timeout time.Duration) {
+func ReadInterface(iface string, out io.Writer, separator string, ja3s, asJSON, prettyJSON bool, snaplen int, promisc bool, timeout time.Duration) {
 
 	h, err := pcap.OpenLive(iface, int32(snaplen), promisc, timeout)
 	if err != nil {
@@ -95,16 +95,23 @@ func ReadInterface(iface string, out io.Writer, separator string, ja3s bool, asJ
 			}
 
 			if asJSON {
-
 				// make it pretty please
-				b, err := json.MarshalIndent(r, "", "    ")
-				if err != nil {
-					panic(err)
+				var data []byte
+				if prettyJSON {
+					data, err = json.MarshalIndent(r, "", "    ")
+					if err != nil {
+						panic(err)
+					}
+				} else {
+					data, err = json.Marshal(r)
+					if err != nil {
+						panic(err)
+					}
 				}
 
-				if string(b) != "null" { // no matches will result in "null" json
+				if string(data) != "null" { // no matches will result in "null" json
 					// write to output io.Writer
-					_, err = out.Write(b)
+					_, err = out.Write(data)
 					if err != nil {
 						panic(err)
 					}

@@ -17,26 +17,28 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/dreadl0ck/ja3"
 	"github.com/google/gopacket/pcap"
-	"os"
 )
 
 var (
-	flagJSON      = flag.Bool("json", true, "print as JSON array")
-	flagCSV       = flag.Bool("csv", false, "print as CSV")
-	flagTSV       = flag.Bool("tsv", false, "print as TAB separated values")
-	flagSeparator = flag.String("separator", ",", "set a custom separator")
-	flagInput     = flag.String("read", "", "read PCAP file")
-	flagDebug     = flag.Bool("debug", false, "toggle debug mode")
-	flagInterface = flag.String("iface", "", "specify network interface to read packets from")
-	flagJa3S      = flag.Bool("ja3s", true, "include ja3 server hashes (ja3s)")
-	flagOnlyJa3S  = flag.Bool("ja3s-only", false, "dump ja3s only")
-	flagSnaplen   = flag.Int("snaplen", 1514, "default snap length for ethernet frames")
-	flagPromisc   = flag.Bool("promisc", true, "capture in promiscuous mode (requires root)")
+	flagPrettyJSON = flag.Bool("pretty-json", true, "print pretty JSON array")
+	flagJSON       = flag.Bool("json", true, "print as JSON array")
+	flagCSV        = flag.Bool("csv", false, "print as CSV")
+	flagTSV        = flag.Bool("tsv", false, "print as TAB separated values")
+	flagSeparator  = flag.String("separator", ",", "set a custom separator")
+	flagInput      = flag.String("read", "", "read PCAP file")
+	flagDebug      = flag.Bool("debug", false, "toggle debug mode")
+	flagInterface  = flag.String("iface", "", "specify network interface to read packets from")
+	flagJa3S       = flag.Bool("ja3s", true, "include ja3 server hashes (ja3s)")
+	flagOnlyJa3S   = flag.Bool("ja3s-only", false, "dump ja3s only")
+	flagSnaplen    = flag.Int("snaplen", 1514, "default snap length for ethernet frames")
+	flagPromisc    = flag.Bool("promisc", true, "capture in promiscuous mode (requires root)")
 	// https://godoc.org/github.com/google/gopacket/pcap#hdr-PCAP_Timeouts
-	flagTimeout   = flag.Duration("timeout", pcap.BlockForever, "timeout for collecting packet batches")
-	flagVersion   = flag.Bool("version", false, "display version and exit")
+	flagTimeout = flag.Duration("timeout", pcap.BlockForever, "timeout for collecting packet batches")
+	flagVersion = flag.Bool("version", false, "display version and exit")
 )
 
 const version = "v1.0.2"
@@ -53,7 +55,7 @@ func main() {
 	ja3.Debug = *flagDebug
 
 	if *flagInterface != "" {
-		ja3.ReadInterface(*flagInterface, os.Stdout, *flagSeparator, *flagJa3S, *flagJSON, *flagSnaplen, *flagPromisc, *flagTimeout)
+		ja3.ReadInterface(*flagInterface, os.Stdout, *flagSeparator, *flagJa3S, *flagJSON, *flagPrettyJSON, *flagSnaplen, *flagPromisc, *flagTimeout)
 		return
 	}
 
@@ -78,6 +80,6 @@ func main() {
 	}
 
 	if *flagJSON {
-		ja3.ReadFileJSON(*flagInput, os.Stdout, *flagJa3S)
+		ja3.ReadFileJSON(*flagInput, os.Stdout, *flagJa3S, *flagPrettyJSON)
 	}
 }

@@ -41,7 +41,7 @@ type Record struct {
 
 // ReadFileJSON reads the PCAP file at the given path
 // and prints out all packets containing JA3 digests formatted as JSON to the supplied io.Writer
-func ReadFileJSON(file string, out io.Writer, doJA3s bool) {
+func ReadFileJSON(file string, out io.Writer, doJA3s, prettyJSON bool) {
 
 	r, f, err := openPcap(file)
 	if err != nil {
@@ -109,15 +109,23 @@ func ReadFileJSON(file string, out io.Writer, doJA3s bool) {
 		}
 	}
 
-	// make it pretty please
-	b, err := json.MarshalIndent(records, "", "    ")
-	if err != nil {
-		panic(err)
+	var data []byte
+	if prettyJSON {
+		// make it pretty please
+		data, err = json.MarshalIndent(records, "", "    ")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		data, err = json.Marshal(records)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	if string(b) != "null" { // no matches will result in "null" json
+	if string(data) != "null" { // no matches will result in "null" json
 		// write to output io.Writer
-		_, err = out.Write(b)
+		_, err = out.Write(data)
 		if err != nil {
 			panic(err)
 		}
